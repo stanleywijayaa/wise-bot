@@ -59,42 +59,50 @@ router.post('/', async (request, env) => {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (interaction.data.name.toLowerCase()) {
       case AWW_COMMAND.name.toLowerCase(): {
-    // Step 1: Immediate ack
-    (async () => {
-      try {
-        const cuteUrl = await getCuteUrl();
+      // Step 1: Immediate ack
+      (async () => {
+        try {
+          const cuteUrl = await getCuteUrl();
 
-        // Step 2: Follow-up edit
-        await fetch(
-          `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bot ${env.DISCORD_TOKEN}`,
-            },
-            body: JSON.stringify({ content: cuteUrl }),
-          }
-        );
-      } catch (err) {
-        console.error(err);
-      }
+          // Step 2: Follow-up edit
+          await fetch(
+            `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
+            {
+              method: 'PATCH',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bot ${env.DISCORD_TOKEN}`,
+              },
+              body: JSON.stringify({ content: cuteUrl }),
+            }
+          );
+        } catch (err) {
+          console.error(err);
+        }
   })();
 
   return new JsonResponse({
     type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
   });
 }
+      //invite command
+      case INVITE_COMMAND.name.toLowerCase(): {
+        const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${env.DISCORD_APPLICATION_ID}&permissions=8&scope=bot%20applications.commands`;
+        return new JsonResponse({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {content: `Click here to invite the bot to your server: ${inviteUrl}`,
+          flags: InteractionResponseFlags.EPHEMERAL, // Make it visible only to the user who invoked the command
+          },
+        });
+      }
       //returns a random answer from a list of answers
       case DECIDE_COMMAND.name.toLowerCase(): {
         const answers = [ 'Yes', 'No', 'Maybe', 'Definitely', 'Absolutely not' ];
         const randomIndex = Math.floor(Math.random() * answers.length);
         const answer = answers[randomIndex];
         return new JsonResponse({
-          type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: answer,
-          },
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {content: answer,},
         });
       }
       default:
