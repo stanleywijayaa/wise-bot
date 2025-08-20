@@ -8,7 +8,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, INVITE_COMMAND } from './commands.js';
+import { AWW_COMMAND, DECIDE_COMMAND, INVITE_COMMAND } from './commands.js';
 import { getCuteUrl } from './Functions/reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 
@@ -59,22 +59,41 @@ router.post('/', async (request, env) => {
     // Most user commands will come as `APPLICATION_COMMAND`.
     switch (interaction.data.name.toLowerCase()) {
       case AWW_COMMAND.name.toLowerCase(): {
+    // Step 1: Immediate ack
+    (async () => {
+      try {
         const cuteUrl = await getCuteUrl();
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: cuteUrl,
-          },
-        });
+
+        // Step 2: Follow-up edit
+        await fetch(
+          `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bot ${env.DISCORD_TOKEN}`,
+            },
+            body: JSON.stringify({ content: cuteUrl }),
+          }
+        );
+      } catch (err) {
+        console.error(err);
       }
-      case INVITE_COMMAND.name.toLowerCase(): {
-        const applicationId = env.DISCORD_APPLICATION_ID;
-        const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
+  })();
+
+  return new JsonResponse({
+    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+  });
+}
+      //returns a random answer from a list of answers
+      case DECIDE_COMMAND.name.toLowerCase(): {
+        const answers = [ 'Yes', 'No', 'Maybe', 'Ask again later', 'Definitely', 'Absolutely not' ];
+        const randomIndex = Math.floor(Math.random() * answers.length);
+        const answer = answers[randomIndex];
         return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: INVITE_URL,
-            flags: InteractionResponseFlags.EPHEMERAL,
+            content: answer,
           },
         });
       }
