@@ -9,7 +9,7 @@ import {
   verifyKey,
 } from 'discord-interactions';
 import { AWW_COMMAND, DECIDE_COMMAND, INVITE_COMMAND } from './commands.js';
-import { getCuteUrl } from './Functions/reddit.js';
+import { getCuteUrl } from './utils/reddit.js';
 import { InteractionResponseFlags } from 'discord-interactions';
 
 class JsonResponse extends Response {
