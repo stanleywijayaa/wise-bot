@@ -57,8 +57,8 @@ router.post('/', async (request, env) => {
 
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (interaction.data.name.toLowerCase()) {
-      case AWW_COMMAND.name.toLowerCase(): {
+  switch (interaction.data.name.toLowerCase()) {
+    case AWW_COMMAND.name.toLowerCase(): {
       // Step 1: Immediate ack
       (async () => {
         try {
@@ -79,36 +79,36 @@ router.post('/', async (request, env) => {
         } catch (err) {
           console.error(err);
         }
-  })();
+      })();
 
-  return new JsonResponse({
-    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-  });
-}
-      //invite command
-      case INVITE_COMMAND.name.toLowerCase(): {
-        const inviteUrl = `https://discord.com/api/oauth2/authorize?client_id=${env.DISCORD_APPLICATION_ID}&permissions=8&scope=bot%20applications.commands`;
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {content: `Click here to invite the bot to your server: ${inviteUrl}`,
-          flags: InteractionResponseFlags.EPHEMERAL, // Make it visible only to the user who invoked the command
-          },
-        });
-      }
-      //returns a random answer from a list of answers
-      case DECIDE_COMMAND.name.toLowerCase(): {
-        const answers = [ 'Yes', 'No', 'Maybe', 'Definitely', 'Absolutely not' ];
-        const randomIndex = Math.floor(Math.random() * answers.length);
-        const answer = answers[randomIndex];
-        return new JsonResponse({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {content: answer,},
-        });
-      }
-      default:
-        return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
+      return new JsonResponse({
+        type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+      });
     }
+    case INVITE_COMMAND.name.toLowerCase(): {
+      const applicationId = env.DISCORD_APPLICATION_ID;
+      const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
+      return new JsonResponse({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: INVITE_URL,
+          flags: InteractionResponseFlags.EPHEMERAL,
+        },
+      });
+    }
+    case DECIDE_COMMAND.name.toLowerCase(): {
+      const answers = [ 'Yes', 'No', 'Absolutely not' ];
+      const randomIndex = Math.floor(Math.random() * answers.length);
+      const answer = answers[randomIndex];
+      return new JsonResponse({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {content: answer,},
+      });
+    }
+    default:
+      return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
   }
+}
 
   console.error('Unknown Type');
   return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
