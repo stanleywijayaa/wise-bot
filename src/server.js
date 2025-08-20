@@ -87,7 +87,7 @@ router.post('/', async (request, env) => {
 }
       //returns a random answer from a list of answers
       case DECIDE_COMMAND.name.toLowerCase(): {
-        const answers = [ 'Yes', 'No', 'Maybe', 'Ask again later', 'Definitely', 'Absolutely not' ];
+        const answers = [ 'Yes', 'No', 'Maybe', 'Definitely', 'Absolutely not' ];
         const randomIndex = Math.floor(Math.random() * answers.length);
         const answer = answers[randomIndex];
         return new JsonResponse({
