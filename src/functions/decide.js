@@ -14,28 +14,25 @@ function getDecision() {
 export async function handleDecideCommand(interaction, env) {
   const question = interaction.data.options?.find(opt => opt.name === "question")?.value;
 
-  // Immediate response (must be <3s)
-  const thinkingResponse = {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-    data: {
-      content: `🤔 You asked: **${question}**\n> Sundabot is thinking...`,
-    },
+  // Step 1: Send a DEFERRED response (safe for Workers, no timeout issue)
+  const deferredResponse = {
+    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
   };
 
-  // Fire off a follow-up request in the background
+  // Step 2: Send follow-up after a random delay
   (async () => {
     const delay = Math.floor(Math.random() * 2000) + 1000; // 1–3s
-    await new Promise(resolve => setTimeout(resolve, delay)); // ⚠️ won't block initial response
+    await new Promise(resolve => setTimeout(resolve, delay));
 
     const followupUrl = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`;
     await fetch(followupUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content: `🎲 Answer: **${getDecision()}**`
+        content: `🤔 You asked: **${question}**\n🎲 Answer: **${getDecision()}**`
       }),
     });
   })();
 
-  return thinkingResponse;
+  return deferredResponse;
 }
