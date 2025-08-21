@@ -16,7 +16,7 @@ export async function handleDecideCommand(interaction, env, ctx) {
 
   // Immediate response (within 3s)
   const thinkingResponse = {
-    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
     data: {
       content: `🤔 You asked: **${question}**\n> Sundabot is thinking...`,
     },
