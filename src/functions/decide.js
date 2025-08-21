@@ -11,7 +11,7 @@ function getDecision() {
   return answers[randomIndex];
 }
 
-export async function handleDecide(interaction) {
+export async function handleDecideCommand(interaction) {
   const question = interaction.data.options?.find(opt => opt.name === "question")?.value;
 
   // Step 1: Reply immediately with "Bot is thinking..."
