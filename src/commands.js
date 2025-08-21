@@ -11,4 +11,11 @@ export const INVITE_COMMAND = {
 export const DECIDE_COMMAND = {
   name: 'decide',
   description: 'Assist one\'s decision making',
+  options: [
+    {
+      name: 'question',
+      description: 'The question to ask the bot',
+      type: 3, // STRING type
+    }
+  ]
 }
