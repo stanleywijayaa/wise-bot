@@ -7,37 +7,41 @@
 export async function getCuteUrl() {
   const response = await fetch(redditUrl, {
     headers: {
-      'User-Agent': 'wise-discord-bot',
+      'User-Agent': 'sundabot-discord-bot',
     },
   });
+
   if (!response.ok) {
     let errorText = `Error fetching ${response.url}: ${response.status} ${response.statusText}`;
     try {
       const error = await response.text();
-      if (error) {
-        errorText = `${errorText} \n\n ${error}`;
-      }
+      if (error) errorText += `\n\n${error}`;
     } catch {
       // ignore
     }
     throw new Error(errorText);
   }
+
   const data = await response.json();
   const posts = data.data.children
-    .map((post) => {
-      if (post.is_gallery) {
-        return '';
-      }
+    .map((child) => {
+      const post = child.data;
+      if (!post) return null;
+      if (post.is_gallery) return null; // skip galleries for now
       return (
-        post.data?.media?.reddit_video?.fallback_url ||
-        post.data?.secure_media?.reddit_video?.fallback_url ||
-        post.data?.url
+        post.media?.reddit_video?.fallback_url ||
+        post.secure_media?.reddit_video?.fallback_url ||
+        post.url
       );
     })
-    .filter((post) => !!post);
+    .filter((url) => !!url && url.startsWith('http'));
+
+  if (posts.length === 0) {
+    throw new Error('No valid posts found in /r/aww');
+  }
+
   const randomIndex = Math.floor(Math.random() * posts.length);
-  const randomPost = posts[randomIndex];
-  return randomPost;
+  return posts[randomIndex];
 }
 
 export const redditUrl = 'https://www.reddit.com/r/aww/hot.json';
