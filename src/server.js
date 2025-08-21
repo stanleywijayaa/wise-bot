@@ -4,9 +4,9 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { AWW_COMMAND, DECIDE_COMMAND, INVITE_COMMAND } from './commands.js';
-import { getCuteUrl } from './utils/reddit.js';
-import { InteractionResponseFlags } from 'discord-interactions';
+import { DECIDE_COMMAND, INVITE_COMMAND } from './commands.js';
+import { handleInviteCommand } from './functions/invite.js';
+import { handleDecideCommand } from './functions/decide.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
@@ -53,61 +53,16 @@ router.post('/', async (request, env) => {
 
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
-  switch (interaction.data.name.toLowerCase()) {
-    case AWW_COMMAND.name.toLowerCase(): {
-  // Step 1: Send immediate deferred response
-  const deferredResponse = new JsonResponse({
-    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-  });
-
-  // Step 2: Do background fetch and edit the original message
-  (async () => {
-    try {
-      const cuteUrl = await getCuteUrl();
-      if (!cuteUrl) throw new Error("No cute URL returned");
-
-      const resp = await fetch(
-        `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content: cuteUrl }),
-        }
-      );
-
-      if (!resp.ok) {
-        console.error("Failed to PATCH message:", resp.status, await resp.text());
-      }
-    } catch (err) {
-      console.error("Error in aww command:", err);
+    switch (interaction.data.name.toLowerCase()) {
+      case INVITE_COMMAND.name.toLowerCase():
+        return new JsonResponse(handleInviteCommand(env));
+        
+      case DECIDE_COMMAND.name.toLowerCase():
+        return new JsonResponse(handleDecideCommand());
+      
+      default:
+        return new JsonResponse({ error: 'Unknown command' }, { status: 400 });
     }
-  })();
-
-  return deferredResponse;
-}
-    case INVITE_COMMAND.name.toLowerCase(): {
-      const applicationId = env.DISCORD_APPLICATION_ID;
-      const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
-      return new JsonResponse({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: INVITE_URL,
-          flags: InteractionResponseFlags.EPHEMERAL,
-        },
-      });
-    }
-    case DECIDE_COMMAND.name.toLowerCase(): {
-      const answers = [ 'Yes', 'No', 'Absolutely not' ];
-      const randomIndex = Math.floor(Math.random() * answers.length);
-      const answer = answers[randomIndex];
-      return new JsonResponse({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {content: answer,},
-      });
-    }
-    default:
-      return new JsonResponse({ error: 'Unknown Type' }, { status: 400 });
-  }
 }
 
   console.error('Unknown Type');
