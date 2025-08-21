@@ -1,7 +1,3 @@
-/**
- * The core server that runs on a Cloudflare worker.
- */
-
 import { AutoRouter } from 'itty-router';
 import {
   InteractionResponseType,
@@ -59,26 +55,33 @@ router.post('/', async (request, env) => {
     // Most user commands will come as `APPLICATION_COMMAND`.
   switch (interaction.data.name.toLowerCase()) {
     case AWW_COMMAND.name.toLowerCase(): {
-  // Step 1: Immediate ack
+  // Step 1: Send immediate deferred response
   const deferredResponse = new JsonResponse({
     type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
   });
 
-  // Step 2: Do the fetch in the background
-  getCuteUrl()
-    .then(async (cuteUrl) => {
-      await fetch(
+  // Step 2: Do background fetch and edit the original message
+  (async () => {
+    try {
+      const cuteUrl = await getCuteUrl();
+      if (!cuteUrl) throw new Error("No cute URL returned");
+
+      const resp = await fetch(
         `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: cuteUrl }),
         }
       );
-    })
-    .catch((err) => console.error(err));
+
+      if (!resp.ok) {
+        console.error("Failed to PATCH message:", resp.status, await resp.text());
+      }
+    } catch (err) {
+      console.error("Error in aww command:", err);
+    }
+  })();
 
   return deferredResponse;
 }
