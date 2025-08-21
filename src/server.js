@@ -29,13 +29,8 @@ router.get('/', (request, env) => {
   return new Response(`👋 ${env.DISCORD_APPLICATION_ID}`);
 });
 
-/**
- * Main route for all requests sent from Discord.  All incoming messages will
- * include a JSON payload described here:
- * https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object
- */
-router.post('/', async (request, env) => {
-  const { isValid, interaction } = await server.verifyDiscordRequest(
+router.post('/', async (request, env, ctx) => {
+  const { isValid, interaction } = await verifyDiscordRequest(
     request,
     env,
   );
@@ -43,9 +38,8 @@ router.post('/', async (request, env) => {
     return new Response('Bad request signature.', { status: 401 });
   }
 
+  // Handle the interaction based on its type
   if (interaction.type === InteractionType.PING) {
-    // The `PING` message is used during the initial webhook handshake, and is
-    // required to configure the webhook in the developer portal.
     return new JsonResponse({
       type: InteractionResponseType.PONG,
     });
@@ -58,7 +52,10 @@ router.post('/', async (request, env) => {
         return new JsonResponse(handleInviteCommand(env));
         
       case DECIDE_COMMAND.name.toLowerCase():
-        return new JsonResponse(handleDecideCommand());
+        ctx.waitUntil(
+          handleDecideCommand(interaction)
+        );
+        return new JsonResponse({type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE});
       
       default:
         return new JsonResponse({ error: 'Unknown command' }, { status: 400 });
@@ -85,9 +82,14 @@ async function verifyDiscordRequest(request, env) {
   return { interaction: JSON.parse(body), isValid: true };
 }
 
-const server = {
-  verifyDiscordRequest,
-  fetch: router.fetch,
+export default {
+  //Get discord request
+  async fetch(request, env, ctx) {
+    try {
+      return await router.fetch(request, env, ctx);
+    } catch (err) {
+      console.error("Worker error:", err);
+      return new Response("Internal error", { status: 500 });
+    }
+  },
 };
-
-export default server;
