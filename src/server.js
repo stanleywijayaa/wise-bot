@@ -59,32 +59,29 @@ router.post('/', async (request, env) => {
     // Most user commands will come as `APPLICATION_COMMAND`.
   switch (interaction.data.name.toLowerCase()) {
     case AWW_COMMAND.name.toLowerCase(): {
-      // Step 1: Immediate ack
-      (async () => {
-        try {
-          const cuteUrl = await getCuteUrl();
+  // Step 1: Immediate ack
+  const deferredResponse = new JsonResponse({
+    type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
+  });
 
-          // Step 2: Follow-up edit
-          await fetch(
-            `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
-            {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bot ${env.DISCORD_TOKEN}`,
-              },
-              body: JSON.stringify({ content: cuteUrl }),
-            }
-          );
-        } catch (err) {
-          console.error(err);
+  // Step 2: Do the fetch in the background
+  getCuteUrl()
+    .then(async (cuteUrl) => {
+      await fetch(
+        `https://discord.com/api/v10/webhooks/${env.DISCORD_APPLICATION_ID}/${interaction.token}/messages/@original`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ content: cuteUrl }),
         }
-      })();
+      );
+    })
+    .catch((err) => console.error(err));
 
-      return new JsonResponse({
-        type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-      });
-    }
+  return deferredResponse;
+}
     case INVITE_COMMAND.name.toLowerCase(): {
       const applicationId = env.DISCORD_APPLICATION_ID;
       const INVITE_URL = `https://discord.com/oauth2/authorize?client_id=${applicationId}&scope=applications.commands`;
