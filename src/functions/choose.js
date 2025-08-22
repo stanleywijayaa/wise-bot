@@ -20,12 +20,11 @@ export async function handleChooseCommand(interaction) {
   // Follow-up webhook URL
   const followupUrl = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`;
 
-  // Schedule the follow-up using waitUntil
   const delay = Math.floor(Math.random() * 2000) + 1000; // 1–3s
-  await new Promise((r) => setTimeout(r, delay));
   const optionsArray = options.split(",").map((opt) => opt.trim());
   const chosen = optionsArray[Math.floor(Math.random() * optionsArray.length)];
   const response = `${getPrefix()} **${chosen}**`;
+  await new Promise((r) => setTimeout(r, delay));
   await fetch(followupUrl, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

@@ -19,7 +19,6 @@ export async function handleDecideCommand(interaction) {
   // Follow-up webhook URL
   const followupUrl = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`;
 
-  // Schedule the follow-up using waitUntil
   let response;
   const delay = Math.floor(Math.random() * 2000) + 1000; // 1–3s
   if (!question) {

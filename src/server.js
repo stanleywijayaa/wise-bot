@@ -7,6 +7,7 @@ import {
 import { DECIDE_COMMAND, INVITE_COMMAND, CHOOSE_COMMAND } from './commands.js';
 import { handleInviteCommand } from './functions/invite.js';
 import { handleDecideCommand } from './functions/decide.js';
+import { handleChooseCommand } from './functions/choose.js';
 
 class JsonResponse extends Response {
   constructor(body, init) {
