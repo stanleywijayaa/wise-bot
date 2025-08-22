@@ -1,5 +1,3 @@
-import { InteractionResponseType } from "discord-interactions";
-
 function getDecision() {
   const answers = [
     "👍Yes",
@@ -8,13 +6,12 @@ function getDecision() {
     "GASKAN!!!🔥🔥🔥",
     "🙂‍↔️jangan bang",
     "🏃🏾‍♀️💨tanya lagi nanti",
-    ];
+  ];
   const randomIndex = Math.floor(Math.random() * answers.length);
   return answers[randomIndex];
 }
 
 export async function handleDecideCommand(interaction) {
-  console.log("entered handle decide command");
   const question = interaction.data.options?.find(
     (opt) => opt.name === "question"
   )?.value;
@@ -25,8 +22,11 @@ export async function handleDecideCommand(interaction) {
   // Schedule the follow-up using waitUntil
   let response;
   const delay = Math.floor(Math.random() * 2000) + 1000; // 1–3s
-  if (!question) { response = `Answer: **${getDecision()}**`; }
-  else { response = `Answer to "${question}": **${getDecision()}**`; }
+  if (!question) {
+    response = `Answer: **${getDecision()}**`;
+  } else {
+    response = `Answer to "${question}": **${getDecision()}**`;
+  }
   await new Promise((r) => setTimeout(r, delay));
   await fetch(followupUrl, {
     method: "POST",

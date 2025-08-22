@@ -22,3 +22,19 @@ export const DECIDE_COMMAND = {
     }
   ]
 }
+
+export const CHOOSE_COMMAND = {
+  name: 'choose',
+  description: 'assist one\'s to choose between options',
+  type: 1, // CHAT_INPUT type
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+  options: [
+    {
+      name: 'options',
+      description: 'the options to choose from',
+      type: 3,
+      required: true,
+    }
+  ]
+}

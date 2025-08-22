@@ -4,7 +4,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { DECIDE_COMMAND, INVITE_COMMAND } from './commands.js';
+import { DECIDE_COMMAND, INVITE_COMMAND, CHOOSE_COMMAND } from './commands.js';
 import { handleInviteCommand } from './functions/invite.js';
 import { handleDecideCommand } from './functions/decide.js';
 
@@ -57,6 +57,12 @@ router.post('/', async (request, env, ctx) => {
         );
         return new JsonResponse({type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE});
       
+      case CHOOSE_COMMAND.name.toLowerCase():
+        ctx.waitUntil(
+          handleChooseCommand(interaction)
+        );
+        return new JsonResponse({type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE});
+        
       default:
         return new JsonResponse({ error: 'Unknown command' }, { status: 400 });
     }
