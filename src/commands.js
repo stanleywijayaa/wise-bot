@@ -11,6 +11,9 @@ export const INVITE_COMMAND = {
 export const DECIDE_COMMAND = {
   name: 'decide',
   description: 'Assist one\'s decision making',
+  type: 1, // CHAT_INPUT type
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
   options: [
     {
       name: 'question',
