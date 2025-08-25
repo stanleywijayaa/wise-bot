@@ -4,8 +4,7 @@ import {
   InteractionType,
   verifyKey,
 } from 'discord-interactions';
-import { DECIDE_COMMAND, INVITE_COMMAND, CHOOSE_COMMAND } from './commands.js';
-import { handleInviteCommand } from './functions/invite.js';
+import { DECIDE_COMMAND, CHOOSE_COMMAND } from './commands.js';
 import { handleDecideCommand } from './functions/decide.js';
 import { handleChooseCommand } from './functions/choose.js';
 
