@@ -48,10 +48,7 @@ router.post('/', async (request, env, ctx) => {
 
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
     // Most user commands will come as `APPLICATION_COMMAND`.
-    switch (interaction.data.name.toLowerCase()) {
-      case INVITE_COMMAND.name.toLowerCase():
-        return new JsonResponse(handleInviteCommand(env));
-        
+    switch (interaction.data.name.toLowerCase()) {    
       case DECIDE_COMMAND.name.toLowerCase():
         ctx.waitUntil(
           handleDecideCommand(interaction)
